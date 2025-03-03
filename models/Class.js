@@ -1,10 +1,15 @@
 const mongoose = require("mongoose");
 
-//define  Class Schema
+// Define Class Schema
 const ClassSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+  },
+  classCode: {
+    type: String,
+    required: true,
+    unique: true,
   },
   description: {
     type: String,
@@ -14,11 +19,12 @@ const ClassSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  teacherId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  teachers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   students: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -49,5 +55,4 @@ const ClassSchema = new mongoose.Schema({
 
 // Export the Class model
 const Class = mongoose.model("Class", ClassSchema);
-
 module.exports = Class;

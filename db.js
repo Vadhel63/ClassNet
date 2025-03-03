@@ -12,6 +12,6 @@ const db = mongoose.connection;
 //expert database connection
 module.exports = db;
 
-db.on("connected",()=>{
-    console.log("connected to database");
-})
+db.on("connected", () => {
+  console.log("connected to database");
+});

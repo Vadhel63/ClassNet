@@ -18,10 +18,11 @@ const MessageSchema = new mongoose.Schema({
   },
   sentAt: {
     type: Date,
-    required: true,
+    default: Date.now,
   },
   readAt: {
     type: Date,
+    default: Date.now,
   },
 });
 

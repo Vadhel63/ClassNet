@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-//define  User Schema
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -17,8 +16,12 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["teacher", "student", "admin"],
-    required: true,
+    enum: ["teacher", "student"],
+    default: "teacher", 
+  },
+  addedByAdmin: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin", 
   },
   classes: [
     {

@@ -6,13 +6,19 @@ const Announcement = require("./../models/Announcement");
 router.post("/", async (req, res) => {
   try {
     const data = req.body;
+
+    // Validate required fields (customize according to your schema)
+    if (!data.title || !data.content || !data.classId) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     const newAnnouncement = new Announcement(data);
     const response = await newAnnouncement.save();
-    console.log("Announcement data saved successfully");
-    res.status(200).json(response);
+    console.log("Announcement data saved successfully:", response);
+    res.status(201).json(response); // 201 Created
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
+    console.error("Error saving announcement:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 });
 
@@ -21,11 +27,11 @@ router.get("/class/:classId", async (req, res) => {
   try {
     const classId = req.params.classId;
     const response = await Announcement.find({ classId: classId });
-    console.log("Announcements fetched successfully");
+    console.log("Announcements fetched successfully for class ID:", classId);
     res.status(200).json(response);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
+    console.error("Error fetching announcements by class ID:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 });
 
@@ -33,18 +39,15 @@ router.get("/class/:classId", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const announcementId = req.params.id;
-    const response = await Announcement.findById(announcementId).populate(
-      "classId"
-    );
+    const response = await Announcement.findById(announcementId).populate("classId");
     if (!response) {
-      res.status(404).json({ message: "Announcement not found" });
-    } else {
-      console.log("Announcement fetched successfully");
-      res.status(200).json(response);
+      return res.status(404).json({ message: "Announcement not found" });
     }
+    console.log("Announcement fetched successfully:", response);
+    res.status(200).json(response);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
+    console.error("Error fetching announcement by ID:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 });
 
@@ -52,11 +55,11 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const announcements = await Announcement.find().populate("classId");
-    console.log("Announcements fetched successfully");
+    console.log("All announcements fetched successfully");
     res.status(200).json(announcements);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
+    console.error("Error fetching all announcements:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 });
 
@@ -65,6 +68,12 @@ router.put("/:id", async (req, res) => {
   try {
     const announcementId = req.params.id;
     const updatedAnnouncementData = req.body;
+
+    // Validate required fields (customize according to your schema)
+    if (!updatedAnnouncementData.title || !updatedAnnouncementData.content) {
+      return res.status(400).json({ message: "Title and content are required" });
+    }
+
     const response = await Announcement.findByIdAndUpdate(
       announcementId,
       updatedAnnouncementData,
@@ -73,15 +82,16 @@ router.put("/:id", async (req, res) => {
         runValidators: true, // Validate the updated document
       }
     );
+    
     if (!response) {
-      res.status(404).json({ message: "Announcement not found" });
-    } else {
-      console.log("Announcement data updated successfully");
-      res.status(200).json(response);
+      return res.status(404).json({ message: "Announcement not found" });
     }
+    
+    console.log("Announcement data updated successfully:", response);
+    res.status(200).json(response);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
+    console.error("Error updating announcement:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 });
 
@@ -90,15 +100,16 @@ router.delete("/:id", async (req, res) => {
   try {
     const announcementId = req.params.id;
     const response = await Announcement.findByIdAndDelete(announcementId);
+    
     if (!response) {
-      res.status(404).json({ message: "Announcement not found" });
-    } else {
-      console.log("Announcement data deleted successfully");
-      res.status(200).json({ message: "Announcement successfully deleted" });
+      return res.status(404).json({ message: "Announcement not found" });
     }
+    
+    console.log("Announcement data deleted successfully:", announcementId);
+    res.status(200).json({ message: "Announcement successfully deleted" });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
+    console.error("Error deleting announcement:", err);
+    res.status(500).json({ message: "Internal server error", error: err.message });
   }
 });
 

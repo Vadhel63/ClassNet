@@ -25,6 +25,19 @@ const AssignmentSchema = new mongoose.Schema({
       ref: "Submission",
     },
   ],
+  fileUrl: {
+    type: String, // URL or path to the uploaded assignment file
+  },
+  links: [
+    {
+      type: String, // Optional links for assignment references
+    },
+  ],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId, // Reference to the User who created the assignment
+    ref: "User", // Ensure you have a User model
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

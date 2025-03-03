@@ -13,9 +13,10 @@ const SubmissionSchema = new mongoose.Schema({
     required: true,
   },
   fileUrl: {
-    type: String,
+    type: String, // URL or path to the submitted file
     required: true,
   },
+
   comments: {
     type: String,
   },
@@ -27,7 +28,7 @@ const SubmissionSchema = new mongoose.Schema({
   },
   submittedAt: {
     type: Date,
-    required: true,
+    default: Date.now,
   },
   gradedAt: {
     type: Date,

@@ -1,8 +1,11 @@
 const User = require("./models/User");
 const Class = require("./models/Class");
 const db = require("./db");
+const dotenv = require("dotenv");
+dotenv.config();
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const Announcement = require("./models/Announcement");
 
 const Assignment = require("./models/Assignment");
@@ -12,9 +15,17 @@ const Message = require("./models/Message");
 const Submissions = require("./models/Submissions");
 
 const SupportRequest = require("./models/support_request");
+app.use(cors());
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.json()); //req.body
+app.use(bodyParser.urlencoded({ extended: true }));
+const path = require("path");
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+//for admin
+const AdminRoutes = require("./routes/AdminRoutes");
+app.use("/admin", AdminRoutes);
 
 const userRoutes = require("./routes/userRoutes");
 
@@ -42,7 +53,8 @@ app.use("/message", messageRoutes);
 
 //for supportRequest
 const supportRequestRoutes = require("./routes/support_requestRoutes");
+const Admin = require("./models/Admin");
 app.use("/support_request", supportRequestRoutes);
-app.listen(3000, () => {
-  console.log("server is listing port no:3000");
+app.listen(5000, () => {
+  console.log("server is listing port no:5000");
 });

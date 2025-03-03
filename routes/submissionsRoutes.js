@@ -1,109 +1,46 @@
 const express = require("express");
+const {
+  createSubmission,
+  getSubmissionsByAssignment,
+
+  updateSubmission,
+  deleteSubmission,
+  gradeSubmission,
+} = require("../Controllers/SubmissionController");
+const auth = require("../middleware/auth");
+const upload = require("../middleware/file-upload"); // Assuming you have a middleware for file upload
 const router = express.Router();
-const Submission = require("./../models/Submissions");
+const Submission = require("../models/Submissions");
+// Student Routes
+router.post("/:assignmentId", auth, upload.single("file"), createSubmission); // Student submits an assignment
+router.put("/:id", upload.single("file"), updateSubmission); // Student updates an assignment
+router.delete("/:id", deleteSubmission); // Student deletes an assignment
 
-// Create a new submission
-router.post("/", async (req, res) => {
+// Teacher Routes
+router.get("/:assignmentId/submissions", getSubmissionsByAssignment);
+router.get("/user/:assignmentId", auth, async (req, res) => {
+  const { assignmentId } = req.params;
   try {
-    const data = req.body;
-    const newSubmission = new Submission(data);
-    const response = await newSubmission.save();
-    console.log("Submission data saved successfully");
-    res.status(200).json(response);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
-  }
-});
-
-// Get submissions by assignment ID
-router.get("/assignment/:assignmentId", async (req, res) => {
-  try {
-    const assignmentId = req.params.assignmentId;
-    const response = await Submission.find({
+    // Find submissions based on assignment ID and user ID
+    const submission = await Submission.find({
       assignmentId: assignmentId,
-    }).populate("studentId");
-    console.log("Submissions fetched successfully");
-    res.status(200).json(response);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
-  }
-});
+      studentId: req.userData.userId,
+    });
 
-// Get a single submission by ID
-router.get("/:id", async (req, res) => {
-  try {
-    const submissionId = req.params.id;
-    const response = await Submission.findById(submissionId)
-      .populate("assignmentId")
-      .populate("studentId");
-    if (!response) {
-      res.status(404).json({ message: "Submission not found" });
-    } else {
-      console.log("Submission fetched successfully");
-      res.status(200).json(response);
+    if (!submission) {
+      return res.status(404).json({
+        message: "No submission found for this user and assignment.",
+      });
     }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
+
+    res.status(200).json(submission);
+  } catch (error) {
+    console.error("Error fetching submission:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Get all submissions
-router.get("/", async (req, res) => {
-  try {
-    const submissions = await Submission.find()
-      .populate("assignmentId")
-      .populate("studentId");
-    console.log("Submissions fetched successfully");
-    res.status(200).json(submissions);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
-  }
-});
-
-// Update a submission by ID
-router.put("/:id", async (req, res) => {
-  try {
-    const submissionId = req.params.id;
-    const updatedSubmissionData = req.body;
-    const response = await Submission.findByIdAndUpdate(
-      submissionId,
-      updatedSubmissionData,
-      {
-        new: true, // Return the updated document
-        runValidators: true, // Validate the updated document
-      }
-    );
-    if (!response) {
-      res.status(404).json({ message: "Submission not found" });
-    } else {
-      console.log("Submission data updated successfully");
-      res.status(200).json(response);
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
-  }
-});
-
-// Delete a submission by ID
-router.delete("/:id", async (req, res) => {
-  try {
-    const submissionId = req.params.id;
-    const response = await Submission.findByIdAndDelete(submissionId);
-    if (!response) {
-      res.status(404).json({ message: "Submission not found" });
-    } else {
-      console.log("Submission data deleted successfully");
-      res.status(200).json({ message: "Submission successfully deleted" });
-    }
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Internal server error", error: err });
-  }
-});
+// Teacher gets submissions for an assignment
+router.put("/grade/:id", gradeSubmission); // Teacher grades a submission
 
 module.exports = router;
